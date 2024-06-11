@@ -135,16 +135,23 @@ elif model_selection == backend.models[1]:
     profile_sim_threshold = st.sidebar.slider('User Profile Similarity Threshold %',
                                               min_value=0, max_value=100,
                                               value=50, step=10)
+    params['profile_sim_threshold'] = profile_sim_threshold
 # Clustering model
 elif model_selection == backend.models[2]:
     cluster_no = st.sidebar.slider('Number of Clusters',
                                    min_value=0, max_value=50,
                                    value=20, step=1)
+    params['cluster_no'] = cluster_no
 # Clustering with PCA model
 elif model_selection == backend.models[3]:
     cluster_no = st.sidebar.slider('Number of Clusters',
                                    min_value=0, max_value=50,
                                    value=20, step=1)
+    feature_no = st.sidebar.slider('Number of Principal Components',
+                                   min_value=1, max_value=16,
+                                   value=14, step=1)
+    params['cluster_no'] = cluster_no
+    params['feature_no'] = feature_no
 
 # KNN
 elif model_selection == backend.models[4]:
