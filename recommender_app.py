@@ -90,7 +90,7 @@ def train(model_name, params):
         with st.spinner('Training...'):
             time.sleep(0.5)
             backend.train(model_name)
-         st.success('Done!')
+        st.success('Done!')
         pass
     else:
         pass
