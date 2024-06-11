@@ -86,6 +86,11 @@ def train(model_name, params):
         st.success('Done!')
     # TODO: Add other model training code here
     elif model_name == backend.models[1]:
+        # Start training user profile model
+        with st.spinner('Training...'):
+            time.sleep(0.5)
+            backend.train(model_name)
+         st.success('Done!')
         pass
     else:
         pass
