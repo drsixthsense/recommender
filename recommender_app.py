@@ -140,6 +140,39 @@ elif model_selection == backend.models[2]:
     cluster_no = st.sidebar.slider('Number of Clusters',
                                    min_value=0, max_value=50,
                                    value=20, step=1)
+# Clustering with PCA model
+elif model_selection == backend.models[3]:
+    cluster_no = st.sidebar.slider('Number of Clusters',
+                                   min_value=0, max_value=50,
+                                   value=20, step=1)
+   features_no = st.sidebar.slider('Number of Principal Components',
+                                  nim_value=1, max_value=16,
+                                  value=14, step=1)
+# KNN
+elif model_selection == backend.models[4]:
+    cluster_no = st.sidebar.slider('Number of Clusters',
+                                   min_value=0, max_value=50,
+                                   value=20, step=1)
+# NMF
+elif model_selection == backend.models[5]:
+    cluster_no = st.sidebar.slider('Number of Clusters',
+                                   min_value=0, max_value=50,
+                                   value=20, step=1)
+# Neural Network
+elif model_selection == backend.models[6]:
+    cluster_no = st.sidebar.slider('Number of Clusters',
+                                   min_value=0, max_value=50,
+                                   value=20, step=1)
+# Regression
+elif model_selection == backend.models[7]:
+    cluster_no = st.sidebar.slider('Number of Clusters',
+                                   min_value=0, max_value=50,
+                                   value=20, step=1)
+# Classification
+elif model_selection == backend.models[8]:
+    cluster_no = st.sidebar.slider('Number of Clusters',
+                                   min_value=0, max_value=50,
+                                   value=20, step=1)
 else:
     pass
 
