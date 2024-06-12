@@ -24,6 +24,9 @@ def load_courses():
     df['TITLE'] = df['TITLE'].str.title()
     return df
 
+def load_course_genres():
+    df = pd.read_csv("course_genre.csv")
+    return df
 
 def load_bow():
     return pd.read_csv("courses_bows.csv")
@@ -80,6 +83,12 @@ def course_similarity_recommendations(idx_id_dict, id_idx_dict, enrolled_course_
 # Model training
 def train(model_name, params):
     # TODO: Add model training code here
+    if model_name == models[0]:
+          pass
+    if model_name == models[1]:
+          pass
+    if model_name == models[2]:
+          
     pass
 
 
@@ -88,6 +97,8 @@ def predict(model_name, user_ids, params):
     sim_threshold = 0.6
     if "sim_threshold" in params:
         sim_threshold = params["sim_threshold"] / 100.0
+    if "profile_sim_threshold" in params: 
+        profile_sim_threshold = params["profile_sim_threshold"] / 100.0
     idx_id_dict, id_idx_dict = get_doc_dicts()
     sim_matrix = load_course_sims().to_numpy()
     users = []
@@ -108,7 +119,21 @@ def predict(model_name, user_ids, params):
                     courses.append(key)
                     scores.append(score)
         # TODO: Add prediction model code here
-
+        if model_name == models[1]:
+            course_genres = load_course_genres()
+            test_user_profile = profile_df[profile_df['user'] == user_id]
+            test_user_vector = test_user_profile.iloc[0, 1:].values
+            enrolled_courses = test_users_df[test_users_df['user'] == user_id]['item'].to_list()
+            unknown_courses = all_courses.difference(enrolled_courses)
+            unknown_course_df = course_genres_df[course_genres_df['COURSE_ID'].isin(unknown_courses)]
+            unknown_course_ids = unknown_course_df['COURSE_ID'].values
+            recommendation_scores = np.dot(unknown_course_df.iloc[:, 2:].values, test_user_vector)
+            for i in range(0, len(unknown_course_ids)):
+                 score = recommendation_scores[i]
+                 if score >= score_threshold:
+                      users.append(user_id)
+                      courses.append(unknown_course_ids[i])
+                      scores.append(recommendation_scores[i])
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
     res_dict['SCORE'] = scores
