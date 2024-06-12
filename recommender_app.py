@@ -36,6 +36,9 @@ def load_courses():
 def load_bow():
     return backend.load_bow()
 
+@st.cache
+def load_course_genres():
+    return backend.load_course_genres()
 
 # Initialize the app by first loading datasets
 def init__recommender_app():
@@ -45,6 +48,7 @@ def init__recommender_app():
         sim_df = load_course_sims()
         course_df = load_courses()
         course_bow_df = load_bow()
+        course_genres_df = load_course_genres()
 
     # Select courses
     st.success('Datasets loaded successfully...')
@@ -82,14 +86,14 @@ def train(model_name, params):
         # Start training course similarity model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name)
+            backend.train(model_name, params)
         st.success('Done!')
     # TODO: Add other model training code here
     elif model_name == backend.models[1]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name)
+            backend.train(model_name, params)
         st.success('Done!')
         pass
     else:
