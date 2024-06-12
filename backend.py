@@ -140,6 +140,9 @@ def predict(model_name, user_ids, params):
                     users.append(user_id)
                     courses.append(unknown_course_ids[i])
                     scores.append(recommendation_scores[i])
+            users.append(user_id)
+            courses.append('TEST')
+            scores.append(2233)
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
     res_dict['SCORE'] = scores
