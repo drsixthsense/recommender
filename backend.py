@@ -1,4 +1,7 @@
 import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 models = ("Course Similarity",
           "User Profile",
@@ -25,8 +28,18 @@ def load_courses():
     return df
 
 
+def load_course_genres():
+    df = pd.read_csv("course_genre.csv")
+    return df
+
+
 def load_bow():
     return pd.read_csv("courses_bows.csv")
+
+
+def load_user_profiles():
+    return pd.read_csv("user_profile.csv")
+
 
 
 def add_new_ratings(new_courses):
@@ -80,7 +93,25 @@ def course_similarity_recommendations(idx_id_dict, id_idx_dict, enrolled_course_
 # Model training
 def train(model_name, params):
     # TODO: Add model training code here
+    if model_name == models[0]:
+        pass
+    if model_name == models[1]:
+        pass
+    if model_name == models[2]:
+        pass
+    if model_name == models[3]:
+        pass
     pass
+
+
+def combine_cluster_labels(user_ids, labels):
+    # Convert labels to a DataFrame
+    labels_df = pd.DataFrame(labels)
+    # Merge user_ids DataFrame with labels DataFrame based on index
+    cluster_df = pd.merge(user_ids, labels_df, left_index=True, right_index=True)
+    # Rename columns to 'user' and 'cluster'
+    cluster_df.columns = ['user', 'cluster']
+    return cluster_df
 
 
 # Prediction
@@ -88,6 +119,8 @@ def predict(model_name, user_ids, params):
     sim_threshold = 0.6
     if "sim_threshold" in params:
         sim_threshold = params["sim_threshold"] / 100.0
+    if "profile_sim_threshold" in params:
+        profile_sim_threshold = params["profile_sim_threshold"] / 100.0
     idx_id_dict, id_idx_dict = get_doc_dicts()
     sim_matrix = load_course_sims().to_numpy()
     users = []
@@ -108,6 +141,58 @@ def predict(model_name, user_ids, params):
                     courses.append(key)
                     scores.append(score)
         # TODO: Add prediction model code here
+        if model_name == models[1]:
+            course_genres_df = load_course_genres()
+            ratings_df = load_ratings()
+            all_courses = set(course_genres_df['COURSE_ID'].values)
+            user_ratings = ratings_df[ratings_df['user'] == user_id]
+            enrolled_courses = user_ratings['item'].to_list()
+            # Trying to create a user vector here
+            courses_of_user = course_genres_df[course_genres_df['COURSE_ID'].isin(enrolled_courses)]
+            user_vector = courses_of_user.drop(columns=['COURSE_ID', 'TITLE']).sum(axis=0)
+            user_vector_df = user_vector * 3
+            user_vector_df = pd.DataFrame(user_vector_df).T
+            # Finishing with user vector
+            test_user_vector = user_vector_df.iloc[0, :].values
+
+            unknown_courses = all_courses.difference(enrolled_courses)
+            unknown_course_df = course_genres_df[course_genres_df['COURSE_ID'].isin(unknown_courses)]
+            unknown_course_ids = unknown_course_df['COURSE_ID'].values
+            recommendation_scores = np.dot(unknown_course_df.iloc[:, 2:].values, test_user_vector)
+            for i in range(0, len(unknown_course_ids)):
+                score = recommendation_scores[i]
+                if score >= profile_sim_threshold:
+                    users.append(user_id)
+                    courses.append(unknown_course_ids[i])
+                    scores.append(recommendation_scores[i])
+        if model_name == models[2]:
+            # Generating current user's vector
+            course_genres_df = load_course_genres()
+            ratings_df = load_ratings()
+            all_courses = set(course_genres_df['COURSE_ID'].values)
+            user_ratings = ratings_df[ratings_df['user'] == user_id]
+            enrolled_courses = user_ratings['item'].to_list()
+            # Trying to create a user vector here
+            courses_of_user = course_genres_df[course_genres_df['COURSE_ID'].isin(enrolled_courses)]
+            user_vector = courses_of_user.drop(columns=['COURSE_ID', 'TITLE']).sum(axis=0)
+            user_vector_df = user_vector * 3
+            user_vector_df = pd.DataFrame(user_vector_df).T
+            test_user_vector = user_vector_df.iloc[0, :].values
+            # Getting all users profiles
+            user_profile_df = load_user_profiles()
+            feature_names = list(user_profile_df.columns[1:])
+            cluster_no = params['cluster_no']
+            # Adding user vector to the rest
+            user_profile_df2 = user_profile_df.append(test_user_vector, ignore_index=True)
+            # Standardize the features data for clustering
+            scaler = StandardScaler()
+            user_profile_df2[feature_names] = scaler.fit_transform(user_profile_df2[feature_names])
+            features = user_profile_df2.loc[:, user_profile_df2.columns != 'user']
+            user_ids = user_profile_df2.loc[:, user_profile_df2.columns == 'user']
+            kmeans = KMeans(n_clusters=cluster_no, random_state=42)
+            kmeans.fit(features)
+            cluster_labels = [None] * len(user_ids)
+            result_df = combine_cluster_labels(user_ids, cluster_labels)
 
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
