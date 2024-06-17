@@ -183,7 +183,7 @@ def predict(model_name, user_ids, params):
             feature_names = list(user_profile_df.columns[1:])
             cluster_no = params['cluster_no']
             # Adding user vector to the rest
-            user_profile_df2 = user_profile_df.append(test_user_vector, ignore_index=True)
+            user_profile_df2 = user_profile_df.append(user_vector_df, ignore_index=True)
             # Standardize the features data for clustering
             scaler = StandardScaler()
             user_profile_df2[feature_names] = scaler.fit_transform(user_profile_df2[feature_names])
