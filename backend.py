@@ -31,6 +31,10 @@ def load_course_genres():
     return df
 
 
+def load_user_profiles():
+    return pd.read_csv("user_profile.csv")
+
+
 def load_bow():
     return pd.read_csv("courses_bows.csv")
 
