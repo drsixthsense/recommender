@@ -166,6 +166,7 @@ def predict(model_name, user_ids, params):
                     courses.append(unknown_course_ids[i])
                     scores.append(recommendation_scores[i])
         if model_name == models[2]:
+            user_profile_df = load_user_profiles()
             # Generating current user's vector
             course_genres_df = load_course_genres()
             ratings_df = load_ratings()
@@ -177,13 +178,14 @@ def predict(model_name, user_ids, params):
             user_vector = courses_of_user.drop(columns=['COURSE_ID', 'TITLE']).sum(axis=0)
             user_vector_df = user_vector * 3
             user_vector_df = pd.DataFrame(user_vector_df).T
+            user_vector_df.insert(0, 'user', user_id)
             test_user_vector = user_vector_df.iloc[0, :].values
             # Getting all users profiles
-            user_profile_df = load_user_profiles()
+            # user_profile_df = load_user_profiles()
             feature_names = list(user_profile_df.columns[1:])
             cluster_no = params['cluster_no']
             # Adding user vector to the rest
-            user_profile_df2 = user_profile_df.append(user_vector_df, ignore_index=True)
+            user_profile_df2 = pd.concat([user_vector_df, user_profile_df], ignore_index=True)
             # Standardize the features data for clustering
             scaler = StandardScaler()
             user_profile_df2[feature_names] = scaler.fit_transform(user_profile_df2[feature_names])
@@ -191,8 +193,32 @@ def predict(model_name, user_ids, params):
             user_ids = user_profile_df2.loc[:, user_profile_df2.columns == 'user']
             kmeans = KMeans(n_clusters=cluster_no, random_state=42)
             kmeans.fit(features)
-            cluster_labels = [None] * len(user_ids)
+            cluster_labels = kmeans.labels_
             result_df = combine_cluster_labels(user_ids, cluster_labels)
+            ratings_df_labelled = pd.merge(ratings_df, result_df, left_on='user', right_on='user')
+            # Extracting the 'item' and 'cluster' columns from the test_users_labelled DataFrame
+            courses_cluster = ratings_df_labelled[['item', 'cluster']]
+            # Adding a new column 'count' with a value of 1 for each row in the courses_cluster DataFrame
+            courses_cluster['count'] = [1] * len(courses_cluster)
+            # Grouping the DataFrame by 'cluster' and 'item', aggregating the 'count' column with the sum function,
+            # and resetting the index to make the result more readable
+            courses_cluster_grouped = courses_cluster.groupby(['cluster', 'item']).agg(
+                enrollments=('count', 'sum')).reset_index()
+            # Getting user's visited courses, user's cluster number
+            user_courses_df = ratings_df_labelled[ratings_df_labelled['user'] == user_id]
+            user_courses = user_courses_df['item'].tolist()
+            user_cluster = user_courses_df['cluster'].iloc[0]
+            # Defining popular courses of this cluster
+            cluster_courses = courses_cluster_grouped[courses_cluster_grouped['cluster'] == user_cluster]
+            popular_courses = cluster_courses[cluster_courses['enrollments'] > 150].sort_values(by='enrollments',
+                                                                                                ascending=False)
+            # Checking through list of populars. If course does not belong to user courses, adding to final result
+            for course, enrollment in zip(popular_courses['item'].values, popular_courses['enrollments'].values):
+                if course not in user_courses:
+                    users.append(user_id)
+                    courses.append(course)
+                    scores.append(enrollment)
+
 
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
