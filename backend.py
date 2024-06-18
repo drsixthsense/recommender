@@ -159,7 +159,6 @@ def predict(model_name, user_ids, params):
             user_vector_df = pd.DataFrame(user_vector_df).T
             # Finishing with user vector
             test_user_vector = user_vector_df.iloc[0, :].values
-
             unknown_courses = all_courses.difference(enrolled_courses)
             unknown_course_df = course_genres_df[course_genres_df['COURSE_ID'].isin(unknown_courses)]
             unknown_course_ids = unknown_course_df['COURSE_ID'].values
