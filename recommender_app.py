@@ -158,7 +158,7 @@ elif model_selection == backend.models[2]:
                                    min_value=0, max_value=50,
                                    value=20, step=1)
     popularity = st.sidebar.slider('Popularity threshold',
-                                   min_value=0, max_value=500,
+                                   min_value=0, max_value=1500,
                                    value=150, step=50)
     params['cluster_no'] = cluster_no
     params['popularity'] = popularity
