@@ -231,7 +231,7 @@ def predict(model_name, user_ids, params):
                     users.append(user_id)
                     courses.append(course)
                     scores.append(enrollment)
-        if model_name == models[2]:
+        if model_name == models[3]:
             user_profile_df = load_user_profiles()
             # Generating current user's vector
             course_genres_df = load_course_genres()
