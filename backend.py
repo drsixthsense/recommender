@@ -120,7 +120,11 @@ def predict(model_name, user_ids, params):
     if "sim_threshold" in params:
         sim_threshold = params["sim_threshold"] / 100.0
     if "profile_sim_threshold" in params:
-        profile_sim_threshold = params["profile_sim_threshold"] / 100.0
+        profile_sim_threshold = params["profile_sim_threshold"]
+    if "popularity" in params:
+        popularity = params['popularity']
+    if "cluster_no" in params:
+        cluster_no = params['cluster_no']
     idx_id_dict, id_idx_dict = get_doc_dicts()
     sim_matrix = load_course_sims().to_numpy()
     users = []
@@ -183,7 +187,6 @@ def predict(model_name, user_ids, params):
             # Getting all users profiles
             # user_profile_df = load_user_profiles()
             feature_names = list(user_profile_df.columns[1:])
-            cluster_no = params['cluster_no']
             # Adding user vector to the rest
             user_profile_df2 = pd.concat([user_vector_df, user_profile_df], ignore_index=True)
             # Standardize the features data for clustering
@@ -210,7 +213,7 @@ def predict(model_name, user_ids, params):
             user_cluster = user_courses_df['cluster'].iloc[0]
             # Defining popular courses of this cluster
             cluster_courses = courses_cluster_grouped[courses_cluster_grouped['cluster'] == user_cluster]
-            popular_courses = cluster_courses[cluster_courses['enrollments'] > 150].sort_values(by='enrollments',
+            popular_courses = cluster_courses[cluster_courses['enrollments'] > popularity].sort_values(by='enrollments',
                                                                                                 ascending=False)
             # Checking through list of populars. If course does not belong to user courses, adding to final result
             for course, enrollment in zip(popular_courses['item'].values, popular_courses['enrollments'].values):
