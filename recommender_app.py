@@ -170,8 +170,12 @@ elif model_selection == backend.models[3]:
     feature_no = st.sidebar.slider('Number of Principal Components',
                                    min_value=1, max_value=16,
                                    value=14, step=1)
+    popularity = st.sidebar.slider('Popularity threshold',
+                                   min_value=0, max_value=1500,
+                                   value=150, step=50)
     params['cluster_no'] = cluster_no
     params['feature_no'] = feature_no
+    params['popularity'] = popularity
 
 # KNN
 elif model_selection == backend.models[4]:
