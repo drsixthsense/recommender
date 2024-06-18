@@ -96,6 +96,13 @@ def train(model_name, params):
             backend.train(model_name, params)
         st.success('Done!')
         pass
+    elif model_name == backend.models[2]:
+        # Start training user profile model
+        with st.spinner('Training...'):
+            time.sleep(0.5)
+            backend.train(model_name, params)
+        st.success('Done!')
+        pass
     else:
         pass
 
@@ -150,7 +157,11 @@ elif model_selection == backend.models[2]:
     cluster_no = st.sidebar.slider('Number of Clusters',
                                    min_value=0, max_value=50,
                                    value=20, step=1)
+    popularity = st.sidebar.slider('Popularity threshold',
+                                   min_value=0, max_value=500,
+                                   value=150, step=50)
     params['cluster_no'] = cluster_no
+    params['popularity'] = popularity
 # Clustering with PCA model
 elif model_selection == backend.models[3]:
     cluster_no = st.sidebar.slider('Number of Clusters',
