@@ -258,8 +258,7 @@ def predict(model_name, user_ids, params):
             user_ids = user_profile_df2.loc[:, user_profile_df2.columns == 'user']
             # Applying PCA
             features_df = pca(features, feature_no)
-            df_combined = pd.concat(
-                [user_profile_df['user'], features_df], axis=1)
+            df_combined = pd.concat([user_profile_df2['user'], features_df], axis=1)
             df_combined.set_index('user', inplace=True)
             kmeans = KMeans(n_clusters=cluster_no, random_state=42)
             kmeans.fit(features_df)
