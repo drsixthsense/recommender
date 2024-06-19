@@ -311,8 +311,10 @@ def predict(model_name, user_ids, params):
             model_surprise_knn = KNNBasic(sim_options=sim_options)
             trainset = course_dataset.build_full_trainset()
             model_surprise_knn.fit(trainset)
-
+            print(user_id)
             ratings_df = load_ratings()
+            user_df = ratings_df[ratings_df['user']==user_id]
+            user_df.head()
             course_genres_df = load_course_genres()
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
