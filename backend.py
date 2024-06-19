@@ -114,6 +114,7 @@ def train(model_name, params):
         model_surprise_knn = KNNBasic(sim_options=sim_options)
         trainset = course_dataset.build_full_trainset()
         model_surprise_knn.fit(trainset)
+        global model_surprise
         model_surprise = model_surprise_knn
     pass
 
@@ -307,6 +308,7 @@ def predict(model_name, user_ids, params):
             enrolled_courses = user_ratings['item'].to_list()
             all_courses = set(course_genres_df['COURSE_ID'].values)
             unknown_courses = all_courses.difference(enrolled_courses)
+            global model_surprise
             def predict_ratings(algo, unknown_courses):
                 predictions = []
                 for item in unknown_courses:
