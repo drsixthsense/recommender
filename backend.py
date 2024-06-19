@@ -311,6 +311,7 @@ def predict(model_name, user_ids, params):
             model_surprise_knn = KNNBasic(sim_options=sim_options)
             trainset = course_dataset.build_full_trainset()
             model_surprise_knn.fit(trainset)
+            print("----------------------------------------------")
             print(user_id)
             ratings_df = load_ratings()
             user_df = ratings_df[ratings_df['user']==user_id]
