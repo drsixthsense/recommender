@@ -110,14 +110,7 @@ def train(model_name, params):
     if model_name == models[3]:
         pass
     if model_name == models[4]:
-        reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
-        course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
-        sim_options = {'name': 'pearson', 'user_based': False}
-        model_surprise_knn = KNNBasic(sim_options=sim_options)
-        trainset = course_dataset.build_full_trainset()
-        model_surprise_knn.fit(trainset)
-        global model_surprise
-        model_surprise = model_surprise_knn
+        pass
     if model_name == models[5]:
         reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
         course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
@@ -312,6 +305,13 @@ def predict(model_name, user_ids, params):
                     courses.append(course)
                     scores.append(enrollment)
         if model_name == models[4]:
+            reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
+            course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
+            sim_options = {'name': 'pearson', 'user_based': False}
+            model_surprise_knn = KNNBasic(sim_options=sim_options)
+            trainset = course_dataset.build_full_trainset()
+            model_surprise_knn.fit(trainset)
+
             ratings_df = load_ratings()
             course_genres_df = load_course_genres()
             user_ratings = ratings_df[ratings_df['user'] == user_id]
