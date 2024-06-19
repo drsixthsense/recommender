@@ -328,7 +328,7 @@ def predict(model_name, user_ids, params):
                         users.append(user_id)
                         courses.append(item)
                         scores.append(pred.est)
-            predict_ratings(model_surprise, unknown_courses)
+            predict_ratings(model_surprise_knn, unknown_courses)
         if model_name == models[5]:
             ratings_df = load_ratings()
             course_genres_df = load_course_genres()
