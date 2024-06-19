@@ -86,17 +86,31 @@ def train(model_name, params):
         # Start training course similarity model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name, params)
+            # backend.train(model_name, params)
         st.success('Done!')
     # TODO: Add other model training code here
     elif model_name == backend.models[1]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name, params)
+            # backend.train(model_name, params)
         st.success('Done!')
         pass
     elif model_name == backend.models[2]:
+        # Start training user profile model
+        with st.spinner('Training...'):
+            time.sleep(0.5)
+            # backend.train(model_name, params)
+        st.success('Done!')
+        pass
+    elif model_name == backend.models[3]:
+        # Start training user profile model
+        with st.spinner('Training...'):
+            time.sleep(0.5)
+            # backend.train(model_name, params)
+        st.success('Done!')
+        pass
+    elif model_name == backend.models[4]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
@@ -179,9 +193,7 @@ elif model_selection == backend.models[3]:
 
 # KNN
 elif model_selection == backend.models[4]:
-    cluster_no = st.sidebar.slider('Number of Clusters',
-                                   min_value=0, max_value=50,
-                                   value=20, step=1)
+    pass
 # NMF
 elif model_selection == backend.models[5]:
     cluster_no = st.sidebar.slider('Number of Clusters',
