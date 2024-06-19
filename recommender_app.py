@@ -187,18 +187,15 @@ elif model_selection == backend.models[3]:
     popularity = st.sidebar.slider('Popularity threshold',
                                    min_value=0, max_value=1500,
                                    value=150, step=50)
-    params['cluster_no'] = cluster_no
-    params['feature_no'] = feature_no
-    params['popularity'] = popularity
-
 # KNN
 elif model_selection == backend.models[4]:
     pass
-# NMF
+# Number of Factors for Surprise NMF
 elif model_selection == backend.models[5]:
-    cluster_no = st.sidebar.slider('Number of Clusters',
+    factor_no = st.sidebar.slider('Number of Factors',
                                    min_value=0, max_value=50,
                                    value=20, step=1)
+    params['factor_no'] = factor_no
 # Neural Network
 elif model_selection == backend.models[6]:
     cluster_no = st.sidebar.slider('Number of Clusters',
