@@ -125,7 +125,7 @@ def train(model_name, params):
         trainset = course_dataset.build_full_trainset()
         model_surprise_nmf.fit(trainset)
         global surprise_nmf
-        surprise_nmf = model_surprise_knn
+        surprise_nmf = model_surprise_nmf
     pass
 
 
