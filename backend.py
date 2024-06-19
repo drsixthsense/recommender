@@ -110,7 +110,7 @@ def train(model_name, params):
     if model_name == models[4]:
         reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
         course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
-        sim_options = {'name': 'cosine', 'user_based': False}
+        sim_options = {'name': 'cosine', 'user_based': True}
         model_surprise_knn = KNNBasic(sim_options=sim_options)
         trainset = course_dataset.build_full_trainset()
         model_surprise_knn.fit(trainset)
