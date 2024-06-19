@@ -19,7 +19,7 @@ models = ("Course Similarity",
           "Regression with Embedding Features",
           "Classification with Embedding Features")
 model_surprise = KNNBasic()
-model_surprise_nmf = NMF()
+surprise_nmf = NMF()
 
 
 def load_ratings():
@@ -124,8 +124,8 @@ def train(model_name, params):
         model_surprise_nmf = NMF(verbose=True, random_state=123, init_low=0.5, init_high = 5.0, n_factors=params["factor_no"])
         trainset = course_dataset.build_full_trainset()
         model_surprise_nmf.fit(trainset)
-        global model_surprise_nmf
-        model_surprise_nmf = model_surprise_knn
+        global surprise_nmf
+        surprise_nmf = model_surprise_knn
     pass
 
 
@@ -338,6 +338,7 @@ def predict(model_name, user_ids, params):
             unknown_courses = all_courses.difference(enrolled_courses)
             filtered_unknown_courses = [course_id for course_id in unknown_courses if
                                         course_id in ratings_df['item'].values]
+            global surprise_nmf
             def predict_ratings(algo, user_df):
                 predictions = []
                 for course in filtered_unknown_courses:
@@ -349,7 +350,7 @@ def predict(model_name, user_ids, params):
                         courses.append(course)
                         scores.append(pred.est)
             # Predict ratings for the specific user
-            predict_ratings(model_surprise_nmf, user_id)
+            predict_ratings(surprise_nmf, user_id)
 
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
