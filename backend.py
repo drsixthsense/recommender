@@ -587,6 +587,8 @@ def predict(model_name, user_ids, params):
             predict_ratings(model_surprise_nmf, filtered_unknown_courses)
         if model_name == models[6]:
             ratings_df = load_ratings()
+            num_users = len(ratings_df['user'].unique())
+            num_items = len(ratings_df['item'].unique())
             course_genres_df = pd.read_csv('course_genre.csv')
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
