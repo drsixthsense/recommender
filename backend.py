@@ -25,7 +25,7 @@ surprise_nmf = NMF()
 
 def load_ratings():
     return pd.read_csv("ratings.csv")
-
+user_ratings_glob = load_ratings()
 
 def load_course_sims():
     return pd.read_csv("sim.csv")
@@ -62,9 +62,9 @@ def add_new_ratings(new_courses):
         res_dict['item'] = new_courses
         res_dict['rating'] = ratings
         new_df = pd.DataFrame(res_dict)
-        st.info(new_id)
-        st.info(new_df.head())
         updated_ratings = pd.concat([ratings_df, new_df])
+        global user_ratings_glob
+        user_ratings_glob = updated_ratings
         updated_ratings.to_csv("ratings.csv", index=False)
         return new_id
 
@@ -308,7 +308,8 @@ def predict(model_name, user_ids, params):
                     scores.append(enrollment)
         if model_name == models[4]:
             # Training
-            ratings_df = load_ratings()
+            global user_ratings_glob
+            ratings_df = user_ratings_glob
             reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
             course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
             sim_options = {'name': 'pearson', 'user_based': False}
