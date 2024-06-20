@@ -114,16 +114,22 @@ def train(model_name, params):
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name, params)
+            # backend.train(model_name, params)
         st.success('Training is not required for this model!')
         pass
     elif model_name == backend.models[5]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name, params)
+            # backend.train(model_name, params)
         st.success('Training is not required for this model!')
         pass
+    elif model_name == backend.models[6]:
+        # Start training user profile model
+        with st.spinner('Training...'):
+            time.sleep(0.5)
+            backend.train(model_name, params)
+        st.success('Done!')
     else:
         pass
 
@@ -205,9 +211,10 @@ elif model_selection == backend.models[5]:
     params['factor_no'] = factor_no
 # Neural Network
 elif model_selection == backend.models[6]:
-    cluster_no = st.sidebar.slider('Number of Clusters',
-                                   min_value=0, max_value=50,
-                                   value=20, step=1)
+    nn_threshold = st.sidebar.slider('The ratings threshold',
+                                   min_value=1, max_value=3,
+                                   value=1.5, step=0.1)
+    params['nn_threshold'] = nn_threshold
 # Regression
 elif model_selection == backend.models[7]:
     cluster_no = st.sidebar.slider('Number of Clusters',

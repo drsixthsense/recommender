@@ -4,3 +4,4 @@ streamlit
 streamlit-aggrid==0.2.2-2
 scikit-learn==1.3.1
 surprise
+tensorflow==2.16.1

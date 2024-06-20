@@ -9,6 +9,9 @@ from surprise import accuracy
 from surprise.model_selection import train_test_split as surprise_train_test_split
 from surprise import Dataset, Reader
 import streamlit as st
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
 models = ("Course Similarity",
           "User Profile",
@@ -98,6 +101,157 @@ def course_similarity_recommendations(idx_id_dict, id_idx_dict, enrolled_course_
     return res
 
 
+def process_dataset(raw_data):
+    encoded_data = raw_data.copy()  # Make a copy of the raw dataset to avoid modifying the original data.
+
+    # Mapping user ids to indices
+    user_list = encoded_data["user"].unique().tolist()  # Get unique user IDs from the dataset.
+    user_id2idx_dict = {x: i for i, x in enumerate(user_list)}  # Create a dictionary mapping user IDs to indices.
+    user_idx2id_dict = {i: x for i, x in
+                        enumerate(user_list)}  # Create a dictionary mapping user indices back to original user IDs.
+
+    # Mapping course ids to indices
+    course_list = encoded_data["item"].unique().tolist()  # Get unique item (course) IDs from the dataset.
+    course_id2idx_dict = {x: i for i, x in enumerate(course_list)}  # Create a dictionary mapping item IDs to indices.
+    course_idx2id_dict = {i: x for i, x in
+                          enumerate(course_list)}  # Create a dictionary mapping item indices back to original item IDs.
+
+    # Convert original user ids to idx
+    encoded_data["user"] = encoded_data["user"].map(user_id2idx_dict)
+    # Convert original course ids to idx
+    encoded_data["item"] = encoded_data["item"].map(course_id2idx_dict)
+    # Convert rating to int
+    encoded_data["rating"] = encoded_data["rating"].values.astype("int")
+
+    return encoded_data, user_idx2id_dict, course_idx2id_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
+
+
+class RecommenderNet(keras.Model):
+    """
+        Neural network model for recommendation.
+
+        This model learns embeddings for users and items, and computes the dot product
+        of the user and item embeddings to predict ratings or preferences.
+
+        Attributes:
+        - num_users (int): Number of users.
+        - num_items (int): Number of items.
+        - embedding_size (int): Size of embedding vectors for users and items.
+    """
+
+    def __init__(self, num_users, num_items, embedding_size=16, **kwargs):
+        """
+            Constructor.
+
+            Args:
+            - num_users (int): Number of users.
+            - num_items (int): Number of items.
+            - embedding_size (int): Size of embedding vectors for users and items.
+         """
+        super(RecommenderNet, self).__init__(**kwargs)
+        self.num_users = num_users
+        self.num_items = num_items
+        self.embedding_size = embedding_size
+
+        # Define a user_embedding vector
+        # Input dimension is the num_users
+        # Output dimension is the embedding size
+        # A name for the layer, which helps in identifying the layer within the model.
+
+        self.user_embedding_layer = layers.Embedding(
+            input_dim=num_users,
+            output_dim=embedding_size,
+            name='user_embedding_layer',
+            embeddings_initializer="he_normal",
+            embeddings_regularizer=keras.regularizers.l2(1e-6),
+        )
+        # Define a user bias layer
+        # Bias is applied per user, hence output_dim is set to 1.
+        self.user_bias = layers.Embedding(
+            input_dim=num_users,
+            output_dim=1,
+            name="user_bias")
+
+        # Define an item_embedding vector
+        # Input dimension is the num_items
+        # Output dimension is the embedding size
+        self.item_embedding_layer = layers.Embedding(
+            input_dim=num_items,
+            output_dim=embedding_size,
+            name='item_embedding_layer',
+            embeddings_initializer="he_normal",
+            embeddings_regularizer=keras.regularizers.l2(1e-6),
+        )
+        # Define an item bias layer
+        # Bias is applied per item, hence output_dim is set to 1.
+        self.item_bias = layers.Embedding(
+            input_dim=num_items,
+            output_dim=1,
+            name="item_bias")
+
+        self.dense1 = layers.Dense(128, activation='relu', name='dense1')
+        self.dense2 = layers.Dense(64, activation='relu', name='dense2')
+        self.dense3 = layers.Dense(32, activation='relu', name='dense3')
+        self.final_dense = layers.Dense(embedding_size, activation='relu', name='final_dense')
+
+    def call(self, inputs):
+        """
+            Method called during model fitting.
+
+            Args:
+            - inputs (tf.Tensor): Input tensor containing user and item one-hot vectors.
+
+            Returns:
+            - tf.Tensor: Output tensor containing predictions.
+        """
+        # Compute the user embedding vector
+        user_vector = self.user_embedding_layer(inputs[:, 0])
+        user_vector = self.dense1(user_vector)
+        user_vector = self.dense2(user_vector)
+        user_vector = self.dense3(user_vector)
+        user_vector = self.final_dense(user_vector)
+        # Compute the user bias
+        user_bias = self.user_bias(inputs[:, 0])
+        # Compute the item embedding vector
+        item_vector = self.item_embedding_layer(inputs[:, 1])
+        # Compute the item bias
+        item_bias = self.item_bias(inputs[:, 1])
+        # Compute dot product of user and item embeddings
+        dot_user_item = tf.tensordot(user_vector, item_vector, 2)
+        # Add all the components (including bias)
+        x = dot_user_item + user_bias + item_bias
+        # Apply ReLU activation function
+        return tf.nn.relu(x)
+
+def process_dataset(raw_data):
+    encoded_data = raw_data.copy() # Make a copy of the raw dataset to avoid modifying the original data.
+
+    # Mapping user ids to indices
+    user_list = encoded_data["user"].unique().tolist() # Get unique user IDs from the dataset.
+    user_id2idx_dict = {x: i for i, x in enumerate(user_list)} # Create a dictionary mapping user IDs to indices.
+    user_idx2id_dict = {i: x for i, x in enumerate(user_list)} # Create a dictionary mapping user indices back to original user IDs.
+
+    # Mapping course ids to indices
+    course_list = encoded_data["item"].unique().tolist() # Get unique item (course) IDs from the dataset.
+    course_id2idx_dict = {x: i for i, x in enumerate(course_list)} # Create a dictionary mapping item IDs to indices.
+    course_idx2id_dict = {i: x for i, x in enumerate(course_list)} # Create a dictionary mapping item indices back to original item IDs.
+
+    # Convert original user ids to idx
+    encoded_data["user"] = encoded_data["user"].map(user_id2idx_dict)
+    # Convert original course ids to idx
+    encoded_data["item"] = encoded_data["item"].map(course_id2idx_dict)
+    # Convert rating to int
+    encoded_data["rating"] = encoded_data["rating"].values.astype("int")
+
+    return encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
+
+gl_encoded_data = []
+gl_user_idx2id_dict = []
+gl_user_id2idx_dict = []
+gl_course_idx2id_dict = []
+gl_course_id2idx_dict = []
+gl_nn_model = []
+
 # Model training
 def train(model_name, params):
     # TODO: Add model training code here
@@ -113,6 +267,30 @@ def train(model_name, params):
         pass
     if model_name == models[5]:
         pass
+    if model_name == models[6]:
+        ratings_df = pd.read_csv('ratings.csv')
+        encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict = process_dataset(
+            ratings_df)
+        num_users = len(ratings_df['user'].unique())
+        num_items = len(ratings_df['item'].unique())
+        embedding_size = 32
+        model = RecommenderNet(num_users, num_items, embedding_size)
+        x = encoded_data[['user', 'item']]
+        y = encoded_data['rating']
+        model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
+        history = model.fit(x, y, validation_split=0.2, epochs=3, batch_size=64, verbose=1)
+        global gl_nn_model
+        global gl_encoded_data
+        global gl_user_id2idx_dict
+        global gl_user_idx2id_dict
+        global gl_course_id2idx_dict
+        global gl_course_idx2id_dict
+        gl_encoded_data = encoded_data
+        gl_user_idx2id_dict = user_idx2id_dict
+        gl_user_id2idx_dict = user_id2idx_dict
+        gl_course_idx2id_dict = course_idx2id_dict
+        gl_course_id2idx_dict = course_id2idx_dict
+        gl_nn_model = model
     pass
 
 
@@ -133,6 +311,36 @@ def pca(x_data, n_components):
           round(sum(fit_pca.explained_variance_ratio_), 2))
     return fit_pca.transform(x_data)
 
+
+def predict_ratings_for_user(model, user_id, unseen_courses, user_id2idx_dict, course_id2idx_dict, course_idx2id_dict):
+    # Check if the user is new or existing
+    if user_id in user_id2idx_dict:
+        encoded_user_id = user_id2idx_dict[user_id]
+    else:
+        # For a new user, assign a temporary user ID and add it to the dictionary
+        encoded_user_id = max(user_id2idx_dict.values()) + 1
+        user_id2idx_dict[user_id] = encoded_user_id
+
+    # Encode unseen courses
+    encoded_courses = [course_id2idx_dict[course_id] for course_id in unseen_courses if course_id in course_id2idx_dict]
+
+    # Prepare input tensor
+    user_array = np.array([encoded_user_id] * len(encoded_courses))
+    courses_array = np.array(encoded_courses)
+    input_tensor = np.vstack((user_array, courses_array)).T
+
+    # Predict ratings
+    predictions = model.predict(input_tensor)
+
+    # Decode predicted ratings back to original course IDs
+    decoded_predictions = [(course_idx2id_dict[course_idx], pred[0]) for course_idx, pred in
+                           zip(encoded_courses, predictions)]
+
+    # Create DataFrame for better readability
+    predictions_df = pd.DataFrame(decoded_predictions, columns=["item", "rating"])
+
+    return predictions_df
+
 # Prediction
 def predict(model_name, user_ids, params):
     sim_threshold = 0.6
@@ -146,6 +354,8 @@ def predict(model_name, user_ids, params):
         cluster_no = params['cluster_no']
     if "feature_no" in params:
         feature_no = params['feature_no']
+    if "nn_threshold" in params:
+        nn_threshold = params["nn_threshold"]
     idx_id_dict, id_idx_dict = get_doc_dicts()
     sim_matrix = load_course_sims().to_numpy()
     users = []
@@ -234,7 +444,7 @@ def predict(model_name, user_ids, params):
             # Defining popular courses of this cluster
             cluster_courses = courses_cluster_grouped[courses_cluster_grouped['cluster'] == user_cluster]
             popular_courses = cluster_courses[cluster_courses['enrollments'] > popularity].sort_values(by='enrollments',
-                                                                                                ascending=False)
+                                                                                                       ascending=False)
             # Checking through list of populars. If course does not belong to user courses, adding to final result
             for course, enrollment in zip(popular_courses['item'].values, popular_courses['enrollments'].values):
                 if course not in user_courses:
@@ -315,6 +525,7 @@ def predict(model_name, user_ids, params):
             unknown_courses = all_courses.difference(enrolled_courses)
             filtered_unknown_courses = [course_id for course_id in unknown_courses if
                                         course_id in ratings_df['item'].values]
+
             def predict_ratings(algo, unknown_courses):
                 predictions = []
                 for item in unknown_courses:
@@ -324,7 +535,8 @@ def predict(model_name, user_ids, params):
                         users.append(user_id)
                         courses.append(item)
                         scores.append(pred.est)
-            predict_ratings(model_surprise_knn, unknown_courses)
+
+            predict_ratings(model_surprise_knn, filtered_unknown_courses)
         if model_name == models[5]:
             # Training the model
             ratings_df = load_ratings()
@@ -342,9 +554,10 @@ def predict(model_name, user_ids, params):
             unknown_courses = all_courses.difference(enrolled_courses)
             filtered_unknown_courses = [course_id for course_id in unknown_courses if
                                         course_id in ratings_df['item'].values]
-            def predict_ratings(algo, filtered_unknown_courses):
+
+            def predict_ratings(algo, unknown_courses):
                 predictions = []
-                for course in filtered_unknown_courses:
+                for course in unknown_courses:
                     pred = algo.predict(user_id, course)
                     predictions.append(pred.est)
                     print(pred)
@@ -352,12 +565,34 @@ def predict(model_name, user_ids, params):
                         users.append(user_id)
                         courses.append(course)
                         scores.append(pred.est)
+
             # Predict ratings for the specific user
             predict_ratings(model_surprise_nmf, filtered_unknown_courses)
+        if model_name == models[6]:
+            ratings_df = load_ratings()
+            course_genres_df = pd.read_csv('course_genre.csv')
+            user_ratings = ratings_df[ratings_df['user'] == user_id]
+            enrolled_courses = user_ratings['item'].to_list()
+            all_courses = set(course_genres_df['COURSE_ID'].values)
+            unknown_courses = all_courses.difference(enrolled_courses)
+            filtered_unknown_courses = [course_id for course_id in unknown_courses if
+                                        course_id in ratings_df['item'].values]
+            global gl_nn_model
+            global gl_encoded_data
+            global gl_user_id2idx_dict
+            global gl_user_idx2id_dict
+            global gl_course_id2idx_dict
+            global gl_course_idx2id_dict
+            results_df = predict_ratings_for_user(gl_nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
+                                                  gl_course_id2idx_dict, gl_course_idx2id_dict)
+            for index, row in results_df.iterrows():
+                if row['predicted_rating'] > nn_threshold:
+                    users.append(user_id)
+                    courses.append(row['course_id'])
+                    scores.append(row['predicted_rating'])
 
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
     res_dict['SCORE'] = scores
     res_df = pd.DataFrame(res_dict, columns=['USER', 'COURSE_ID', 'SCORE'])
     return res_df
-
