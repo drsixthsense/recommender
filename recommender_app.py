@@ -220,15 +220,11 @@ elif model_selection == backend.models[6]:
     params['nn_threshold'] = nn_threshold
     params['epochs'] = epochs
 # Regression
-elif model_selection == backend.models[7]:
-    cluster_no = st.sidebar.slider('Number of Clusters',
-                                   min_value=0, max_value=50,
-                                   value=20, step=1)
+# elif model_selection == backend.models[7]:
+#     pass
 # Classification
-elif model_selection == backend.models[8]:
-    cluster_no = st.sidebar.slider('Number of Clusters',
-                                   min_value=0, max_value=50,
-                                   value=20, step=1)
+# elif model_selection == backend.models[8]:
+#     pass
 else:
     pass
 
