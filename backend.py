@@ -245,12 +245,10 @@ def process_dataset(raw_data):
 
     return encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
 
-gl_encoded_data = pd.DataFrame()
 gl_user_idx2id_dict = {}
 gl_user_id2idx_dict = {}
 gl_course_idx2id_dict = {}
 gl_course_id2idx_dict = {}
-gl_nn_model = RecommenderNet(0,0, 16)
 
 # Model training
 def train(model_name, params):
@@ -278,8 +276,9 @@ def train(model_name, params):
         x = encoded_data[['user', 'item']]
         y = encoded_data['rating']
         model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
-        history = model.fit(x, y, validation_split=0.2, epochs=3, batch_size=64, verbose=1)
+        history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
         model.save('nn.keras')
+        st.info("Model has been trained and saved")
         encoded_data.to_csv("encoded_data.csv", index = False)
         global gl_user_id2idx_dict
         global gl_user_idx2id_dict

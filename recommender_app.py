@@ -214,7 +214,11 @@ elif model_selection == backend.models[6]:
     nn_threshold = st.sidebar.slider('The ratings threshold',
                                    min_value=0.0, max_value=3.0,
                                    value=1.4, step=0.1)
+    epochs = st.sidebar.slider('The ratings threshold',
+                                   min_value=1, max_value=20,
+                                   value=1, step=1)
     params['nn_threshold'] = nn_threshold
+    params['epochs'] = epochs
 # Regression
 elif model_selection == backend.models[7]:
     cluster_no = st.sidebar.slider('Number of Clusters',
