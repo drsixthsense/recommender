@@ -600,8 +600,8 @@ def predict(model_name, user_ids, params):
             for index, row in results_df.iterrows():
                 if row['rating'] > nn_threshold:
                     users.append(user_id)
-                    courses.append(row['course_id'])
-                    scores.append(row['predicted_rating'])
+                    courses.append(row['item'])
+                    scores.append(row['rating'])
 
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
