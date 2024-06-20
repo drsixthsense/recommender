@@ -618,9 +618,10 @@ def predict(model_name, user_ids, params):
             try:
                 results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
-                print("Predictions:", results_df)
+                st.info("Predictions:", results_df)
             except Exception as e:
-                print("Error during prediction:", e)
+                logger.error(f"Failed to load model: {e}")
+                st.error(f"Failed to load model: {e}")
             # results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
             #                                       gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
