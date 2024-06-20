@@ -212,7 +212,7 @@ elif model_selection == backend.models[5]:
 # Neural Network
 elif model_selection == backend.models[6]:
     nn_threshold = st.sidebar.slider('The ratings threshold',
-                                   min_value=0, max_value=3,
+                                   min_value=0.0, max_value=3.0,
                                    value=1.4, step=0.1)
     params['nn_threshold'] = nn_threshold
 # Regression
