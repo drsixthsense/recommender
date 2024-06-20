@@ -199,6 +199,15 @@ class RecommenderNet(keras.Model):
         self.dense3 = layers.Dense(32, activation='relu', name='dense3')
         self.final_dense = layers.Dense(embedding_size, activation='relu', name='final_dense')
 
+    def get_config(self):
+        config = super(RecommenderNet, self).get_config()
+        config.update({
+            'num_users': self.num_users,
+            'num_items': self.num_items,
+            'embedding_size': self.embedding_size
+        })
+        return config
+
     def call(self, inputs):
         """
             Method called during model fitting.
@@ -348,9 +357,9 @@ def predict_ratings_for_user(model, user_id, unseen_courses, user_id2idx_dict, c
 
     return predictions_df
 
-def load_model(model_path):
+def load_nn_model(model_path):
     try:
-        model = tf.keras.models.load_model(model_path)
+        model = tf.keras.models.load_model(model_path, custom_objects={'RecommenderNet': RecommenderNet})
         logger.info(f"Model loaded successfully from {model_path}")
         return model
     except Exception as e:
@@ -605,7 +614,7 @@ def predict(model_name, user_ids, params):
             st.info(user_id)
             # nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
 
-            nn_model = load_model('nn.keras')
+            nn_model = load_nn_model('nn.keras')
             results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
