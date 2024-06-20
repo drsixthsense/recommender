@@ -603,7 +603,7 @@ def predict(model_name, user_ids, params):
             # results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
             #                                       gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
-                if row['predicted_rating'] > nn_threshold:
+                if row['rating'] > nn_threshold:
                     users.append(user_id)
                     courses.append(row['course_id'])
                     scores.append(row['predicted_rating'])
