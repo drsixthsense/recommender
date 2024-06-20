@@ -50,7 +50,6 @@ def load_user_profiles():
     return pd.read_csv("user_profile.csv")
 
 
-
 def add_new_ratings(new_courses):
     res_dict = {}
     if len(new_courses) > 0:
@@ -63,6 +62,8 @@ def add_new_ratings(new_courses):
         res_dict['item'] = new_courses
         res_dict['rating'] = ratings
         new_df = pd.DataFrame(res_dict)
+        st.info(new_id)
+        st.info(new_df.head())
         updated_ratings = pd.concat([ratings_df, new_df])
         updated_ratings.to_csv("ratings.csv", index=False)
         return new_id
