@@ -245,6 +245,8 @@ def process_dataset(raw_data):
 
     return encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
 
+
+gl_nn_model = RecommenderNet(0,0,16)
 gl_user_idx2id_dict = {}
 gl_user_id2idx_dict = {}
 gl_course_idx2id_dict = {}
@@ -284,6 +286,8 @@ def train(model_name, params):
         global gl_user_idx2id_dict
         global gl_course_id2idx_dict
         global gl_course_idx2id_dict
+        global gl_nn_model
+        gl_nn_model = model
         gl_user_idx2id_dict = user_idx2id_dict
         gl_user_id2idx_dict = user_id2idx_dict
         gl_course_idx2id_dict = course_idx2id_dict
@@ -578,9 +582,10 @@ def predict(model_name, user_ids, params):
             global gl_user_idx2id_dict
             global gl_course_id2idx_dict
             global gl_course_idx2id_dict
+            global gl_nn_model
 
-            nn_model = tf.keras.models.load_model('nn.keras')
-            results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
+            # nn_model = tf.keras.models.load_model('nn.keras') - this won't work because need to add @Serializable
+            results_df = predict_ratings_for_user(gl_nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
                 if row['predicted_rating'] > nn_threshold:
