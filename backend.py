@@ -615,8 +615,14 @@ def predict(model_name, user_ids, params):
             # nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
 
             nn_model = load_nn_model('nn.keras')
-            results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
+            try:
+                results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
+                print("Predictions:", results_df)
+            except Exception as e:
+                print("Error during prediction:", e)
+            # results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
+            #                                       gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
                 if row['predicted_rating'] > nn_threshold:
                     users.append(user_id)
