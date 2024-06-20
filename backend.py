@@ -260,12 +260,6 @@ def process_dataset(raw_data):
     return encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
 
 
-gl_nn_model = RecommenderNet(0,0,16)
-gl_user_idx2id_dict = {}
-gl_user_id2idx_dict = {}
-gl_course_idx2id_dict = {}
-gl_course_id2idx_dict = {}
-
 # Model training
 def train(model_name, params):
     # TODO: Add model training code here
@@ -282,31 +276,7 @@ def train(model_name, params):
     if model_name == models[5]:
         pass
     if model_name == models[6]:
-        ratings_df = pd.read_csv('ratings.csv')
-        encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict = process_dataset(
-            ratings_df)
-        num_users = len(ratings_df['user'].unique())
-        num_items = len(ratings_df['item'].unique())
-        embedding_size = 32
-        model = RecommenderNet(num_users, num_items, embedding_size)
-        x = encoded_data[['user', 'item']]
-        y = encoded_data['rating']
-        model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
-        history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
-        model.save('nn.keras') # - need to uncomment, if switch to save/load strategy
-        st.info(model)
-        st.info("Model has been trained and saved")
-        encoded_data.to_csv("encoded_data.csv", index = False)
-        global gl_user_id2idx_dict
-        global gl_user_idx2id_dict
-        global gl_course_id2idx_dict
-        global gl_course_idx2id_dict
-        # global gl_nn_model
-        # gl_nn_model = model
-        gl_user_idx2id_dict = user_idx2id_dict
-        gl_user_id2idx_dict = user_id2idx_dict
-        gl_course_idx2id_dict = course_idx2id_dict
-        gl_course_id2idx_dict = course_id2idx_dict
+        pass
     pass
 
 
@@ -595,9 +565,20 @@ def predict(model_name, user_ids, params):
             # Predict ratings for the specific user
             predict_ratings(model_surprise_nmf, filtered_unknown_courses)
         if model_name == models[6]:
+            # Training
             ratings_df = load_ratings()
+            encoded_data, user_idx2id_dict, user_id2idx_dict, course_idx2id_dict, course_id2idx_dict = process_dataset(
+                ratings_df)
             num_users = len(ratings_df['user'].unique())
             num_items = len(ratings_df['item'].unique())
+            embedding_size = 32
+            model = RecommenderNet(num_users, num_items, embedding_size)
+            x = encoded_data[['user', 'item']]
+            y = encoded_data['rating']
+            model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
+            history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
+            st.info("Model has been trained. Predicting...")
+            #Predicting
             course_genres_df = pd.read_csv('course_genre.csv')
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
@@ -605,18 +586,9 @@ def predict(model_name, user_ids, params):
             unknown_courses = all_courses.difference(enrolled_courses)
             filtered_unknown_courses = [course_id for course_id in unknown_courses if
                                         course_id in ratings_df['item'].values]
-            global gl_user_id2idx_dict
-            global gl_user_idx2id_dict
-            global gl_course_id2idx_dict
-            global gl_course_idx2id_dict
-            # global gl_nn_model
 
-            st.info(user_id)
-            # nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
-
-            nn_model = load_nn_model('nn.keras')
             try:
-                results_df = predict_ratings_for_user(nn_model, user_id - 1, filtered_unknown_courses, gl_user_id2idx_dict,
+                results_df = predict_ratings_for_user(model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
                 st.info("Predictions:", results_df)
             except Exception as e:
