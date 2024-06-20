@@ -309,23 +309,20 @@ def predict(model_name, user_ids, params):
         if model_name == models[4]:
             # Training
             ratings_df = load_ratings()
-            reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
-            course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
+            reader = Reader(rating_scale=(2, 3))
+            course_dataset = Dataset.load_from_df(ratings_df['user', 'item', 'rating'], reader=reader)
+            trainset = course_dataset.build_full_trainset()
             sim_options = {'name': 'pearson', 'user_based': False}
             model_surprise_knn = KNNBasic(sim_options=sim_options)
-            trainset = course_dataset.build_full_trainset()
             model_surprise_knn.fit(trainset)
-            st.info(user_id)
-            st.info(ratings_df.tail(1))
-            user_df = ratings_df[ratings_df['user']==user_id]
-            st.info(user_df.head(1))
             # Prediction
             course_genres_df = load_course_genres()
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
             all_courses = set(course_genres_df['COURSE_ID'].values)
             unknown_courses = all_courses.difference(enrolled_courses)
-            global model_surprise
+            filtered_unknown_courses = [course_id for course_id in unknown_courses if
+                                        course_id in ratings_df['item'].values]
             def predict_ratings(algo, unknown_courses):
                 predictions = []
                 for item in unknown_courses:
