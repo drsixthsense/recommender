@@ -19,8 +19,6 @@ models = ("Course Similarity",
           "Neural Network",
           "Regression with Embedding Features",
           "Classification with Embedding Features")
-model_surprise = KNNBasic()
-surprise_nmf = NMF()
 
 
 def load_ratings():
@@ -114,13 +112,7 @@ def train(model_name, params):
     if model_name == models[4]:
         pass
     if model_name == models[5]:
-        reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
-        course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
-        model_surprise_nmf = NMF(verbose=True, random_state=123, init_low=0.5, init_high = 5.0, n_factors=params["factor_no"])
-        trainset = course_dataset.build_full_trainset()
-        model_surprise_nmf.fit(trainset)
-        global surprise_nmf
-        surprise_nmf = model_surprise_nmf
+        pass
     pass
 
 
@@ -328,13 +320,21 @@ def predict(model_name, user_ids, params):
                 for item in unknown_courses:
                     pred = algo.predict(user_id, item)
                     predictions.append(pred.est)
-                    if pred.est > 2:
+                    if pred.est == 3:
                         users.append(user_id)
                         courses.append(item)
                         scores.append(pred.est)
             predict_ratings(model_surprise_knn, unknown_courses)
         if model_name == models[5]:
+            # Training the model
             ratings_df = load_ratings()
+            reader = Reader(line_format='user item rating', rating_scale=(2, 3))
+            course_dataset = Dataset.load_from_df(ratings_df[['user', 'item', 'rating']], reader=reader)
+            model_surprise_nmf = NMF(verbose=True, random_state=123, init_low=0.5, init_high=5.0,
+                                     n_factors=params["factor_no"])
+            trainset = course_dataset.build_full_trainset()
+            model_surprise_nmf.fit(trainset)
+            # Prediction
             course_genres_df = load_course_genres()
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
@@ -342,19 +342,18 @@ def predict(model_name, user_ids, params):
             unknown_courses = all_courses.difference(enrolled_courses)
             filtered_unknown_courses = [course_id for course_id in unknown_courses if
                                         course_id in ratings_df['item'].values]
-            global surprise_nmf
-            def predict_ratings(algo, user_df):
+            def predict_ratings(algo, filtered_unknown_courses):
                 predictions = []
                 for course in filtered_unknown_courses:
                     pred = algo.predict(user_id, course)
                     predictions.append(pred.est)
                     print(pred)
-                    if (pred.est > 1.5):
+                    if pred.est == 3:
                         users.append(user_id)
                         courses.append(course)
                         scores.append(pred.est)
             # Predict ratings for the specific user
-            predict_ratings(surprise_nmf, user_id)
+            predict_ratings(model_surprise_nmf, filtered_unknown_courses)
 
     res_dict['USER'] = users
     res_dict['COURSE_ID'] = courses
