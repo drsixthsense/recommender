@@ -12,6 +12,11 @@ import streamlit as st
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 models = ("Course Similarity",
           "User Profile",
@@ -343,6 +348,16 @@ def predict_ratings_for_user(model, user_id, unseen_courses, user_id2idx_dict, c
 
     return predictions_df
 
+def load_model(model_path):
+    try:
+        model = tf.keras.models.load_model(model_path)
+        logger.info(f"Model loaded successfully from {model_path}")
+        return model
+    except Exception as e:
+        logger.error(f"Failed to load model: {e}")
+        st.error(f"Failed to load model: {e}")
+        return None
+
 # Prediction
 def predict(model_name, user_ids, params):
     sim_threshold = 0.6
@@ -584,10 +599,11 @@ def predict(model_name, user_ids, params):
             global gl_course_id2idx_dict
             global gl_course_idx2id_dict
             # global gl_nn_model
-            st.info(user_id)
-            nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
 
-            st.info(gl_nn_model)
+            st.info(user_id)
+            # nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
+
+            nn_model = load_model('nn.keras')
             results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
