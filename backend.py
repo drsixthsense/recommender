@@ -310,7 +310,7 @@ def predict(model_name, user_ids, params):
             # Training
             ratings_df = load_ratings()
             reader = Reader(line_format='user item rating', rating_scale=(2, 3))
-            course_dataset = Dataset.load_from_df(ratings_df['user', 'item', 'rating'], reader=reader)
+            course_dataset = Dataset.load_from_df(ratings_df[['user', 'item', 'rating']], reader=reader)
             trainset = course_dataset.build_full_trainset()
             sim_options = {'name': 'pearson', 'user_based': False}
             model_surprise_knn = KNNBasic(sim_options=sim_options)
