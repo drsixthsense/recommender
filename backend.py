@@ -280,6 +280,7 @@ def train(model_name, params):
         model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
         history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
         model.save('nn.keras') # - need to uncomment, if switch to save/load strategy
+        st.info(model.summary())
         st.info("Model has been trained and saved")
         encoded_data.to_csv("encoded_data.csv", index = False)
         global gl_user_id2idx_dict
