@@ -309,7 +309,7 @@ def predict(model_name, user_ids, params):
         if model_name == models[4]:
             # Training
             ratings_df = load_ratings()
-            reader = Reader(rating_scale=(2, 3))
+            reader = Reader(line_format='user item rating', rating_scale=(2, 3))
             course_dataset = Dataset.load_from_df(ratings_df['user', 'item', 'rating'], reader=reader)
             trainset = course_dataset.build_full_trainset()
             sim_options = {'name': 'pearson', 'user_based': False}
