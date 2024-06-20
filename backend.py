@@ -616,7 +616,7 @@ def predict(model_name, user_ids, params):
 
             nn_model = load_nn_model('nn.keras')
             try:
-                results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
+                results_df = predict_ratings_for_user(nn_model, user_id - 1, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
                 st.info("Predictions:", results_df)
             except Exception as e:
