@@ -8,6 +8,7 @@ from surprise import NMF
 from surprise import accuracy
 from surprise.model_selection import train_test_split as surprise_train_test_split
 from surprise import Dataset, Reader
+import streamlit as st
 
 models = ("Course Similarity",
           "User Profile",
@@ -305,17 +306,18 @@ def predict(model_name, user_ids, params):
                     courses.append(course)
                     scores.append(enrollment)
         if model_name == models[4]:
+            # Training
+            ratings_df = load_ratings()
             reader = Reader(line_format='user item rating', sep=',', skip_lines=1, rating_scale=(2, 3))
             course_dataset = Dataset.load_from_file("ratings.csv", reader=reader)
             sim_options = {'name': 'pearson', 'user_based': False}
             model_surprise_knn = KNNBasic(sim_options=sim_options)
             trainset = course_dataset.build_full_trainset()
             model_surprise_knn.fit(trainset)
-            print("----------------------------------------------")
-            print(user_id)
-            ratings_df = load_ratings()
+            st.info(user_id)
             user_df = ratings_df[ratings_df['user']==user_id]
-            user_df.head()
+            st.info(user_df.head(0))
+            # Prediction
             course_genres_df = load_course_genres()
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
