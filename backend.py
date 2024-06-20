@@ -596,7 +596,7 @@ def predict(model_name, user_ids, params):
             try:
                 results_df = predict_ratings_for_user(model, user_id, filtered_unknown_courses, user_id2idx_dict,
                                                       course_id2idx_dict, course_idx2id_dict)
-                st.info("Predictions:", results_df)
+                st.success("Predicting is complete")
             except Exception as e:
                 logger.error(f"Failed to load model: {e}")
                 st.error(f"Failed to load model: {e}")
