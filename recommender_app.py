@@ -87,42 +87,42 @@ def train(model_name, params):
         with st.spinner('Training...'):
             time.sleep(0.5)
             # backend.train(model_name, params)
-        st.info('Training is not required for this model')
+        st.info('Training is not required for this model!')
     # TODO: Add other model training code here
     elif model_name == backend.models[1]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
             # backend.train(model_name, params)
-        st.info('Training is not required for this model')
+        st.success('Training is not required for this model!')
         pass
     elif model_name == backend.models[2]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
             # backend.train(model_name, params)
-        st.info('Training is not required for this model')
+        st.success('Training is not required for this model!')
         pass
     elif model_name == backend.models[3]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
             # backend.train(model_name, params)
-        st.info('Training is not required for this model')
+        st.success('Training is not required for this model!')
         pass
     elif model_name == backend.models[4]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
             backend.train(model_name, params)
-        st.info('Training is not required for this model')
+        st.success('Training is not required for this model!')
         pass
     elif model_name == backend.models[5]:
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
             backend.train(model_name, params)
-        st.success('Done!')
+        st.success('Training is not required for this model!')
         pass
     else:
         pass
