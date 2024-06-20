@@ -125,7 +125,7 @@ def process_dataset(raw_data):
 
     return encoded_data, user_idx2id_dict, course_idx2id_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
 
-
+@tf.keras.utils.register_keras_serializable()
 class RecommenderNet(keras.Model):
     """
         Neural network model for recommendation.
@@ -279,15 +279,15 @@ def train(model_name, params):
         y = encoded_data['rating']
         model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
         history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
-        # model.save('nn.keras') - need to uncomment, if switch to save/load strategy
+        model.save('nn.keras') # - need to uncomment, if switch to save/load strategy
         st.info("Model has been trained and saved")
         encoded_data.to_csv("encoded_data.csv", index = False)
         global gl_user_id2idx_dict
         global gl_user_idx2id_dict
         global gl_course_id2idx_dict
         global gl_course_idx2id_dict
-        global gl_nn_model
-        gl_nn_model = model
+        # global gl_nn_model
+        # gl_nn_model = model
         gl_user_idx2id_dict = user_idx2id_dict
         gl_user_id2idx_dict = user_id2idx_dict
         gl_course_idx2id_dict = course_idx2id_dict
@@ -582,12 +582,12 @@ def predict(model_name, user_ids, params):
             global gl_user_idx2id_dict
             global gl_course_id2idx_dict
             global gl_course_idx2id_dict
-            global gl_nn_model
+            # global gl_nn_model
 
-            # nn_model = tf.keras.models.load_model('nn.keras') - this won't work because need to add @Serializable
+            nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
             st.info(user_id)
             st.info(gl_nn_model.summary())
-            results_df = predict_ratings_for_user(gl_nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
+            results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
                 if row['predicted_rating'] > nn_threshold:
