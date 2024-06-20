@@ -239,8 +239,10 @@ if pred_button and selected_courses_df.shape[0] > 0:
     # Create a new id for current user session
     new_id = backend.add_new_ratings(selected_courses_df['COURSE_ID'].values)
     user_ids = [new_id]
+    st.info(user_ids)
     res_df = predict(model_selection, user_ids, params)
     res_df = res_df[['COURSE_ID', 'SCORE']]
     course_df = load_courses()
+    st.info(user_ids)
     res_df = pd.merge(res_df, course_df, on=["COURSE_ID"]).drop('COURSE_ID', axis=1)
     st.table(res_df)
