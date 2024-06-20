@@ -130,6 +130,7 @@ def process_dataset(raw_data):
 
     return encoded_data, user_idx2id_dict, course_idx2id_dict  # Return the processed dataset and dictionaries mapping indices to original IDs.
 
+
 @tf.keras.utils.register_keras_serializable()
 class RecommenderNet(keras.Model):
     """
@@ -237,18 +238,21 @@ class RecommenderNet(keras.Model):
         # Apply ReLU activation function
         return tf.nn.relu(x)
 
+
 def process_dataset(raw_data):
-    encoded_data = raw_data.copy() # Make a copy of the raw dataset to avoid modifying the original data.
+    encoded_data = raw_data.copy()  # Make a copy of the raw dataset to avoid modifying the original data.
 
     # Mapping user ids to indices
-    user_list = encoded_data["user"].unique().tolist() # Get unique user IDs from the dataset.
-    user_id2idx_dict = {x: i for i, x in enumerate(user_list)} # Create a dictionary mapping user IDs to indices.
-    user_idx2id_dict = {i: x for i, x in enumerate(user_list)} # Create a dictionary mapping user indices back to original user IDs.
+    user_list = encoded_data["user"].unique().tolist()  # Get unique user IDs from the dataset.
+    user_id2idx_dict = {x: i for i, x in enumerate(user_list)}  # Create a dictionary mapping user IDs to indices.
+    user_idx2id_dict = {i: x for i, x in
+                        enumerate(user_list)}  # Create a dictionary mapping user indices back to original user IDs.
 
     # Mapping course ids to indices
-    course_list = encoded_data["item"].unique().tolist() # Get unique item (course) IDs from the dataset.
-    course_id2idx_dict = {x: i for i, x in enumerate(course_list)} # Create a dictionary mapping item IDs to indices.
-    course_idx2id_dict = {i: x for i, x in enumerate(course_list)} # Create a dictionary mapping item indices back to original item IDs.
+    course_list = encoded_data["item"].unique().tolist()  # Get unique item (course) IDs from the dataset.
+    course_id2idx_dict = {x: i for i, x in enumerate(course_list)}  # Create a dictionary mapping item IDs to indices.
+    course_idx2id_dict = {i: x for i, x in
+                          enumerate(course_list)}  # Create a dictionary mapping item indices back to original item IDs.
 
     # Convert original user ids to idx
     encoded_data["user"] = encoded_data["user"].map(user_id2idx_dict)
@@ -327,6 +331,7 @@ def predict_ratings_for_user(model, user_id, unseen_courses, user_id2idx_dict, c
 
     return predictions_df
 
+
 def load_nn_model(model_path):
     try:
         model = tf.keras.models.load_model(model_path, custom_objects={'RecommenderNet': RecommenderNet})
@@ -336,6 +341,7 @@ def load_nn_model(model_path):
         logger.error(f"Failed to load model: {e}")
         st.error(f"Failed to load model: {e}")
         return None
+
 
 # Prediction
 def predict(model_name, user_ids, params):
@@ -578,7 +584,7 @@ def predict(model_name, user_ids, params):
             model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
             history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
             st.info("Model has been trained. Predicting...")
-            #Predicting
+            # Predicting
             course_genres_df = pd.read_csv('course_genre.csv')
             user_ratings = ratings_df[ratings_df['user'] == user_id]
             enrolled_courses = user_ratings['item'].to_list()
@@ -588,8 +594,8 @@ def predict(model_name, user_ids, params):
                                         course_id in ratings_df['item'].values]
 
             try:
-                results_df = predict_ratings_for_user(model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
-                                                  gl_course_id2idx_dict, gl_course_idx2id_dict)
+                results_df = predict_ratings_for_user(model, user_id, filtered_unknown_courses, user_id2idx_dict,
+                                                      course_id2idx_dict, course_idx2id_dict)
                 st.info("Predictions:", results_df)
             except Exception as e:
                 logger.error(f"Failed to load model: {e}")
