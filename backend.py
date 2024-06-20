@@ -280,7 +280,7 @@ def train(model_name, params):
         model.compile(optimizer='adam', loss="mse", metrics=[tf.keras.metrics.RootMeanSquaredError()])
         history = model.fit(x, y, validation_split=0.2, epochs=params["epochs"], batch_size=64, verbose=1)
         model.save('nn.keras') # - need to uncomment, if switch to save/load strategy
-        st.info(model.summary())
+        st.info(model)
         st.info("Model has been trained and saved")
         encoded_data.to_csv("encoded_data.csv", index = False)
         global gl_user_id2idx_dict
@@ -584,10 +584,10 @@ def predict(model_name, user_ids, params):
             global gl_course_id2idx_dict
             global gl_course_idx2id_dict
             # global gl_nn_model
-
-            nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
             st.info(user_id)
-            st.info(gl_nn_model.summary())
+            nn_model = tf.keras.models.load_model('nn.keras') # - this won't work because need to add @Serializable
+
+            st.info(gl_nn_model)
             results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
                                                   gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():
