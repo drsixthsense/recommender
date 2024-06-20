@@ -593,13 +593,8 @@ def predict(model_name, user_ids, params):
             filtered_unknown_courses = [course_id for course_id in unknown_courses if
                                         course_id in ratings_df['item'].values]
 
-            try:
-                results_df = predict_ratings_for_user(model, user_id, filtered_unknown_courses, user_id2idx_dict,
-                                                      course_id2idx_dict, course_idx2id_dict)
-                st.success("Predicting is complete")
-            except Exception as e:
-                logger.error(f"Failed to load model: {e}")
-                st.error(f"Failed to load model: {e}")
+            results_df = predict_ratings_for_user(model, user_id, filtered_unknown_courses, user_id2idx_dict,
+                                                  course_id2idx_dict, course_idx2id_dict)
             # results_df = predict_ratings_for_user(nn_model, user_id, filtered_unknown_courses, gl_user_id2idx_dict,
             #                                       gl_course_id2idx_dict, gl_course_idx2id_dict)
             for index, row in results_df.iterrows():

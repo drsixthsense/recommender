@@ -128,8 +128,8 @@ def train(model_name, params):
         # Start training user profile model
         with st.spinner('Training...'):
             time.sleep(0.5)
-            backend.train(model_name, params)
-        st.success('Done!')
+            # backend.train(model_name, params)
+        st.success('Training will be done during the Recommendation creating!')
     else:
         pass
 
@@ -253,6 +253,5 @@ if pred_button and selected_courses_df.shape[0] > 0:
     res_df = predict(model_selection, user_ids, params)
     res_df = res_df[['COURSE_ID', 'SCORE']]
     course_df = load_courses()
-    st.info(user_ids)
     res_df = pd.merge(res_df, course_df, on=["COURSE_ID"]).drop('COURSE_ID', axis=1)
     st.table(res_df)
